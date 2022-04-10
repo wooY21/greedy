@@ -4,7 +4,8 @@
 #include <string.h>
 #include <ctype.h>
 
-#define MAX_ELEMENT 500
+#define MAX_ELEMENT 1000
+#define ALPHABET 26
 
 //구조체
 typedef struct {
@@ -32,13 +33,14 @@ typedef struct {
 //사용자 정의함수
 HeapType* create();
 void init(HeapType* h);
+void init_alpha(AlphaType* p);
 void insert_min_heap(HeapType* h, Element item);
 Element delete_min_heap(HeapType* h);
 TreeNode* make_tree(TreeNode* left, TreeNode* right);
 void destroy_tree(TreeNode* root);
 int is_leaf(TreeNode* t);
 void print_tree(TreeNode* p, int i, int code[]);
-void hyffman_tree(AlphaType* a, int n);
+void huffman_tree(AlphaType* a, int n);
 
 
 //우선순위큐 생성
@@ -50,6 +52,14 @@ HeapType* create()
 //우선순위큐 초기화
 void init(HeapType* h) {
 	h->heap_size = 0;
+}
+
+//구조체 초기화
+void init_alpha(AlphaType* p) {
+	for (int i = 0; i < ALPHABET; i++) {
+		p[i].ch = i + 97;
+		p[i].freq = 0;
+	}
 }
 
 //삽입함수
@@ -140,7 +150,7 @@ void print_tree(TreeNode* t, int i, int code[]) {
 }
 
 //허프만 트리
-void hyffman_tree(AlphaType* a, int n) {
+void huffman_tree(AlphaType* a, int n) {
 	TreeNode* node, * temp;
 	Element e0, e1, e2;
 	HeapType heap;
@@ -179,5 +189,83 @@ void hyffman_tree(AlphaType* a, int n) {
 
 
 int main() {
+	AlphaType data[ALPHABET];
+	AlphaType* copydata;
 
-} 
+	init_alpha(data);
+	init_alpha(&copydata);
+
+	int count = 0;
+	char a[1000] = { 0 };
+	char* str = (char*)malloc(sizeof(char));
+
+
+
+	//파일 불러오기
+	FILE* fp = fopen("124124.txt", "r");
+	if (fp == NULL) {
+		printf("파일을 불러오지 못했습니다");
+		exit(1);
+	}
+
+	int i = 0;
+	//배열에 파일 문자열담기
+	while (feof(fp) == 0) {
+		a[i] = fgetc(fp);
+		count++;
+		i++;
+	}
+	copydata = (AlphaType*)malloc(sizeof(AlphaType));
+	for (int j = 0; j < count; j++) {
+		printf("%c", a[j]);
+	}
+
+	//문자 소문자로 변경
+	/*
+	for (int j = 0; j < count; j++) {
+		if(isupper(a[j]))
+			a[j] = tolower(a[j]);
+	}*/
+
+	//빈도수 체크
+	for (int j = 0; j < count; j++) {
+		for (int k = 'a'; k <= 'z'; k++) {
+			if (a[j] == k) {
+				data[k - 97].freq++;
+			}
+		}
+
+	}
+
+	for (int j = 0; j < ALPHABET; j++) {
+		printf("%3c%3d\n", data[j].ch, data[j].freq);
+	}
+
+	/*
+	for (int j = 0; j < ALPHABET; j++) {
+		if (data[j].freq != NULL) {
+			copydata[j].freq = data[j].freq;
+		}
+	}
+
+	huffman_tree(copydata, count);
+
+	*/
+
+	/*
+	if (fp != NULL) {
+		while (feof(fp) == 0) {
+			fgets(str, 25, fp);
+			count++;
+
+		}
+	}
+
+	for (int j = 0; j < count; j++) {
+		printf("%s", str);
+	}
+	*/
+	fclose(fp);
+
+	return 0;
+}
