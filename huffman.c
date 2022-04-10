@@ -6,6 +6,7 @@
 
 #define MAX_ELEMENT 1000
 #define ALPHABET 26
+#pragma comment (linker,"/STACK:22496080")
 
 //구조체
 typedef struct {
@@ -129,6 +130,7 @@ int is_leaf(TreeNode* t) {
 void print_tree(TreeNode* t, int i, int code[]) {
 	//왼쪽으로 가면 0 저장, 순환호출
 	if (t->left) {
+
 		code[i] = 0;
 		print_tree(t->left, i, code[i + 1]);
 	}
@@ -138,7 +140,7 @@ void print_tree(TreeNode* t, int i, int code[]) {
 		print_tree(t->right, i, code[i + 1]);
 	}
 
-	if (is_leaf) {
+	if (is_leaf(t)) {
 		printf("%3c\t%3d\t", t->weight.ch, t->weight.freq);
 		int j = 0;
 		while (code[j] == 0 || code[j] == 1) {
@@ -216,16 +218,18 @@ int main() {
 		i++;
 	}
 	copydata = (AlphaType*)malloc(sizeof(AlphaType));
+
 	for (int j = 0; j < count; j++) {
 		printf("%c", a[j]);
 	}
+	printf("\n");
 
 	//문자 소문자로 변경
-	/*
+
 	for (int j = 0; j < count; j++) {
-		if(isupper(a[j]))
+		if (isupper(a[j]))
 			a[j] = tolower(a[j]);
-	}*/
+	}
 
 	//빈도수 체크
 	for (int j = 0; j < count; j++) {
@@ -234,23 +238,20 @@ int main() {
 				data[k - 97].freq++;
 			}
 		}
-
 	}
 
 	for (int j = 0; j < ALPHABET; j++) {
 		printf("%3c%3d\n", data[j].ch, data[j].freq);
 	}
 
-	/*
+
 	for (int j = 0; j < ALPHABET; j++) {
-		if (data[j].freq != NULL) {
-			copydata[j].freq = data[j].freq;
-		}
+		copydata[j].freq = data[j].freq;
 	}
 
 	huffman_tree(copydata, count);
 
-	*/
+
 
 	/*
 	if (fp != NULL) {
