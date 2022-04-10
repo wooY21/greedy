@@ -5,6 +5,7 @@
 #include <ctype.h>
 
 #define MAX_ELEMENT 500
+#define ALPHABET 26
 
 //구조체
 typedef struct {
@@ -32,6 +33,7 @@ typedef struct {
 //사용자 정의함수
 HeapType* create();
 void init(HeapType* h);
+void init_alpha(AlphaType* p);
 void insert_min_heap(HeapType* h, Element item);
 Element delete_min_heap(HeapType* h);
 TreeNode* make_tree(TreeNode* left, TreeNode* right);
@@ -50,6 +52,14 @@ HeapType* create()
 //우선순위큐 초기화
 void init(HeapType* h) {
 	h->heap_size = 0;
+}
+
+//구조체 초기화
+void init_alpha(AlphaType* p) {
+	for (int i = 0; i < ALPHABET; i++) {
+		p[i].ch = i + 97;
+		p[i].freq = 0;
+	}
 }
 
 //삽입함수
@@ -179,5 +189,34 @@ void hyffman_tree(AlphaType* a, int n) {
 
 
 int main() {
+	AlphaType data[ALPHABET];
+	AlphaType* copydata;
 
+	init_alpha(data);
+	int count = 0;
+
+	char* str = (char*)malloc(sizeof(char));
+
+
+
+	FILE* fp = fopen("124124.txt", "r");
+	if (fp == NULL) {
+		printf("파일을 불러오지 못했습니다");
+		exit(1);
+	}
+
+	if (fp != NULL) {
+		while (feof(fp) == 0) {
+			fgets(str, 25, fp);
+			count++;
+
+		}
+	}
+
+	for (int j = 0; j < count; j++) {
+		printf("%s", str);
+	}
+
+	fclose(fp);
+	return 0;
 }
