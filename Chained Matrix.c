@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-int matrix[501][2];
-int dp[501][501];
+int Matrix[300][2];
+int Dp[300][300];
 
 int Matrix_Chain(int n) {
     int a, b;
@@ -11,29 +11,29 @@ int Matrix_Chain(int n) {
             a = j;
             b = j + i;
             if (a == b) {
-                dp[a][b] = 0;
+                Dp[a][b] = 0;
             }
             else {
-                dp[a][b] = 987654321; // 무한대
+                Dp[a][b] = 999999999; // 지속적으로 더 작은 값으로 바뀌기 위해 넣은 최대값
                 for (k = a; k < b; k++) {
-                    dp[a][b] = min(dp[a][b], dp[a][k] + dp[k + 1][b] + (matrix[a][0] * matrix[k][1] * matrix[b][1]));
+                    Dp[a][b] = Min(Dp[a][b], Dp[a][k] + Dp[k + 1][b] + (Matrix[a][0] * Matrix[k][1] * Matrix[b][1])); // DP의 점화식
                 }
             }
         }
     }
-    return dp[0][n - 1];
+    return Dp[0][n - 1]; // 최소 연산 횟수 반환
 }
 
-int min(int x, int y) {
-    return x < y ? x : y; // 최소값
+int Min(int x, int y )  // 더 작은 값을 반환하는 함수 Min
+{
+    return x < y ? x : y; // x가 y보다 크면 x return else y return
 }
 
 int main() {
     int n, i, j;
     scanf("%d", &n);
     for (i = 0; i < n; i++) {
-        scanf("%d %d", &matrix[i][0], &matrix[i][1]);
+        scanf("%d %d", &Matrix[i][0], &Matrix[i][1]);
     }
-    int ans = Matrix_Chain(n);
-    printf("최소연산 횟수 : %d\n", ans);
+    printf("최소연산 횟수 = %d\n", Matrix_Chain(n));
 }
