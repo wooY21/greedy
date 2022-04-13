@@ -2,26 +2,46 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <windows.h>
 
 #define MAX_ELEMENT 100
 #define MAX_CODE 100
 #define ALPHA_SIZE 58
 
+enum ColorType {
+    BLACK,
+    darkBLUE,
+    DarkGreen,
+    darkSkyBlue,
+    DarkRed,
+    DarakPurple,
+    DarkYellow,
+    GRAY,
+    DarkGray,
+    BLUE,
+    GREEN,
+    SkyBlue,
+    RED,
+    PurPPLE,
+    YELLOW,
+    WHITE
+}COLOR;
+
 int bit = 0;
-//int beforebit = 0;
-//int afterbit = 0;
+int beforebit = 0;      //변환 전 비트 수(특수문자 비트 미포함)
+int afterbit = 0;       //변환 후 비트 수(특수문자 비트 미포함)
 
 typedef struct TreeNode {
-    int weight;
-    int alpha;
-    char code[MAX_CODE];
-    int depth;
+    int weight;                     //빈도수
+    int alpha;                      //알파벳
+    char code[MAX_CODE];            //변환된 코드를 담는 배열
+    int depth;                      //노드의 깊이(변환된 코드이 길이)
     struct TreeNode* left_child;
     struct TreeNode* right_child;
 } TreeNode;
 typedef struct {
-    TreeNode* ptree;
-    int key;
+    TreeNode* ptree;                //가상트리
+    int key;                        //빈도수
 } element;
 typedef struct {
     element heap[MAX_ELEMENT];
@@ -39,15 +59,15 @@ void sub_order(TreeNode* r, int i);
 void level_order(TreeNode* r);
 void huffman_tree(int freq[], int n, int total);
 int existingBit(int total);
-int convertedBit(TreeNode* r, int i);
+void textcolor(int colorNum);
 
-init(HeapType* h)
-{
+//우선순위 큐 초기화
+init(HeapType* h) {
     h->heap_size = 0;
 }
 
-void insert_min_heap(HeapType* h, element item)
-{
+//삽입함수
+void insert_min_heap(HeapType* h, element item) {
     int i;
     i = ++(h->heap_size);
 
@@ -55,51 +75,62 @@ void insert_min_heap(HeapType* h, element item)
         h->heap[i] = h->heap[i / 2];
         i /= 2;
     }
+
     h->heap[i] = item;
 }
 
-element delete_min_heap(HeapType* h)
-{
+//삭제 값 반환 함수
+element delete_min_heap(HeapType* h) {
     int parent, child;
     element item, temp;
 
     item = h->heap[1];
     temp = h->heap[(h->heap_size)--];
+
     parent = 1;
     child = 2;
+
     while (child <= h->heap_size) {
-        if ((child <= h->heap_size) &&
-            (h->heap[child].key) > h->heap[child + 1].key)
+        if ((child <= h->heap_size) && (h->heap[child].key) > h->heap[child + 1].key)
             child++;
+
         if (temp.key < h->heap[child].key) break;
+
         h->heap[parent] = h->heap[child];
         parent = child;
         child *= 2;
     }
+
     h->heap[parent] = temp;
     return item;
 }
 
-TreeNode* make_tree(TreeNode* left, TreeNode* right)
-{
+//트리 생성
+TreeNode* make_tree(TreeNode* left, TreeNode* right) {
     TreeNode* node = (TreeNode*)malloc(sizeof(TreeNode));
+
     if (node == NULL) {
         fprintf(stderr, "메모리 에러\n");
         exit(1);
     }
+
     node->left_child = left;
     node->right_child = right;
+
     return node;
 }
 
-void destroy_tree(TreeNode* root)
-{
+//트리 삭제
+void destroy_tree(TreeNode* root) {
     if (root == NULL) return;
+
     destroy_tree(root->left_child);
     destroy_tree(root->right_child);
+
     free(root);
 }
 
+//허프만 코드로 변환
 void huffman_code(TreeNode* r, int n, char* code) {
     if (r) {
         n++;
@@ -115,43 +146,46 @@ void huffman_code(TreeNode* r, int n, char* code) {
     }
 }
 
+//단말노드인지 확인
 int is_leaf(TreeNode* r) {
     return (!(r->left_child) && !(r->right_child));
 }
 
+//재귀함수 호출을 통해 단말노드를 찾고 레벨과 비교
 void sub_order(TreeNode* r, int i)
 {
-    if (r)
-    {
-
+    if (r) {
         sub_order(r->right_child, i);
         sub_order(r->left_child, i);
         if (is_leaf(r) && r->depth == i)
         {
-            printf("weight = %2d depth = %2d char = %c code = %s \n", r->weight, r->depth, r->alpha, r->code);
-            //afterbit += (strlen(r->code) * r->weight);
+            printf("weight = %2d \tchar = %c \tcode = %s \n", r->weight, r->alpha, r->code);
+            beforebit += r->weight * 7;                 //변환 전 비트 수(특수문자 비트 미포함)
+            afterbit += (strlen(r->code) * r->weight);  //변환 후 비트 수(특수문자 비트 미포함)
         }
     }
 }
-void level_order(TreeNode* r)
-{
+
+//레벨순회
+void level_order(TreeNode* r) {
     int i;
-    for (i = 0; i < 10; i++)
-    {
+    for (i = 0; i < 10; i++) {
         sub_order(r, i);
     }
 }
 
-void huffman_tree(int freq[], int n, int total)
-{
+//허프만 트리 생성
+void huffman_tree(int freq[], int n, int total) {
     int i;
     int j = 0;
+
     TreeNode* node, * x;
     HeapType heap;
     element e, e1, e2;
     char* code = (char*)malloc(sizeof(char));
 
     init(&heap);
+
     for (i = 0; i < n; i++) {
         node = make_tree(NULL, NULL);
         e.key = node->weight = freq[i];
@@ -173,78 +207,53 @@ void huffman_tree(int freq[], int n, int total)
     e = delete_min_heap(&heap);
     huffman_code(e.ptree, -1, code);
 
-    int exBit = 0;
-    int conBit = 0;
-
-
     level_order(e.ptree);
-    for (int k = 0; k < 10; k++) {
-        convertedBit(e.ptree, k, bit);
-    }
-    printf("\n");
 
+    int exBit = existingBit(total);     //변환 전 특수문자 포함 비트 수
+    int extra = exBit - beforebit;      //특수문자 비트 수
+    int conBit = afterbit + extra;      //변환 후 특수문자 포함 비트 수 
 
-    exBit = existingBit(total);
-    //int extra = total - afterbit;
-    //printf("\nextra : %d\n", extra);
-    conBit = bit;
-    printf("기존txt 비트수 : %d\n", exBit);
-    printf("변환txt 비트수 : %d\n", conBit);
+    textcolor(DarkYellow);
+    printf("\n기존 txt 비트수 : %d\n", exBit);
+    printf("변환 txt 비트수 : %d\n", conBit);
+    textcolor(RED);;
     printf("압축률 : %.2f\n", ((double)conBit / (double)exBit) * 100);
+    textcolor(WHITE);
+
     destroy_tree(e.ptree);
 }
 
+//특수 문자 포함 기존 비트수 반환
 int existingBit(int total) {
     return 7 * total;
 }
 
-int convertedBit(TreeNode* r, int i) {
-
-    if (r)
-    {
-
-        convertedBit(r->right_child, i);
-        convertedBit(r->left_child, i);
-        if (is_leaf(r) && r->depth == i)
-        {
-
-            int a = r->depth;
-            int b = r->weight;
-            bit += a * b;
-
-        }
-    }
-
-    return bit;
+//콘솔 글씨 색 변환
+void textcolor(int colorNum) {
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), colorNum);
 }
 
-void main()
-{
+//메인
+void main() {
     int i = 0;
     int freq[ALPHA_SIZE] = { 0 };
 
-
-    FILE* stream = fopen("124124.txt", "r");
+    FILE* stream = fopen("english journal.txt", "r");
     if (stream == NULL) { puts("파일이 없습니다."); }
 
     int count = 0;
 
-
-    while (i != EOF)
-    {
+    while (i != EOF) {
         i = fgetc(stream);
+        count++;        //특수문자와 알파벳 카운트
 
-        if ((0 <= (i - 65) <= 25) || (32 <= (i - 65) <= 57))
-        {
+        if ((0 <= (i - 65) <= 25) || (32 <= (i - 65) <= 57)) {
             freq[i - 65] += 1;
-            count++;
-
         }
 
     }
-    count--; //while 마지막 null 값
+    count--;            //while 마지막 null 값
+
     fclose(stream);
-
-
     huffman_tree(freq, ALPHA_SIZE, count);
 }
