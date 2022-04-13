@@ -212,7 +212,7 @@ int main() {
 
 		}
 	}
-
+	  
 	for (int j = 0; j < count; j++) {
 		printf("%s", str);
 	}
